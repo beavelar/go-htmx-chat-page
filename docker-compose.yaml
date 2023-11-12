@@ -1,5 +1,14 @@
 services:
   nginx:
     build: .
+    networks:
+      - content
     ports: 
       - "55590:80"
+  cassandra-db:
+    image: cassandra:latest
+    networks:
+      - database
+networks:
+  content:
+  database:
