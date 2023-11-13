@@ -1,14 +1,50 @@
 services:
+  database:
+    build:
+      context: ./services/database
+      dockerfile: Dockerfile
+    depends_on:
+      postgres-db:
+        condition: service_started
+    environment:
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+    networks:
+      - content
+      - database
+  database-seed:
+    build:
+      context: ./services/database-seed
+      dockerfile: Dockerfile
+    depends_on:
+      postgres-db:
+        condition: service_started
+    environment:
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - INIT_DATABASE=${INIT_DATABASE}
+      - PGPASSWORD=${DATABASE_PASSWORD}
+    networks:
+      - database
+  postgres-db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    networks:
+      - database
   nginx:
     build: .
     networks:
       - content
     ports: 
       - "55590:80"
-  cassandra-db:
-    image: cassandra:latest
-    networks:
-      - database
 networks:
   content:
+    driver: bridge
   database:
+    driver: bridge
