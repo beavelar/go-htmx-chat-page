@@ -15,6 +15,6 @@ func InitDb(host string, name string, user string, pass string) error {
 
     var err error
     connStr := fmt.Sprintf("connect_timeout=10 dbname=%s host=%s user=%s password=%s", name, host, user, pass)
-	Db, err = sql.Open("postgres", connStr)
+    Db, err = sql.Open("postgres", connStr)
     return err
 }
