@@ -1,4 +1,10 @@
 services:
+  content:
+    build:
+      context: ./services/content
+      dockerfile: Dockerfile
+    networks:
+      - content
   database:
     build:
       context: ./services/database
