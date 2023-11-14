@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package database;
+option go_package = "./database";
+
+service DatabaseService {
+    rpc GetMessages(GetMessagesRequest) returns (Messages) {}
+    
+    rpc StreamMessages(StreamMessagesRequest) returns (stream Message) {}
+
+    rpc PostMessage(Message) returns (PostMessageResponse) {}
+}
+
+message GetMessagesRequest {
+    optional int32 initial_limit = 10;
+}
+
+message Messages {
+    repeated Message messages = 1;
+}
+
+message Message {
+    string name = 1;
+    string message = 2;
+    int64 time = 3;
+}
+
+message PostMessageResponse {
+    bool success = 1;
+}
+
+message StreamMessagesRequest {}
