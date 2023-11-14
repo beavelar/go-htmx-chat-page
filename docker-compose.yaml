@@ -3,6 +3,11 @@ services:
     build:
       context: ./services/content
       dockerfile: Dockerfile
+    environment:
+      - CONTENT_SERVICE_HOST=content
+      - CONTENT_SERVICE_PORT=80
+      - DB_SERVICE_HOST=database
+      - DB_SERVICE_PORT=80
     networks:
       - content
   database:
