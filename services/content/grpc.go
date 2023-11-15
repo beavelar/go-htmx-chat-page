@@ -19,13 +19,21 @@ var (
 )
 
 func CloseConn() {
-	conn.Close()
+	if conn != nil {
+		conn.Close()
+	}
 }
 
 func GetMessages(limit int32) (*proto.Messages, error) {
 	req := &proto.GetMessagesRequest{}
 	if limit > 0 {
 		req.InitialLimit = &limit
+	}
+
+	if client == nil {
+		msg := "unable to get all messages, content service grpc client has not been initialized"
+		log.Println(msg)
+		return nil, errors.New(msg)
 	}
 
 	res, err := client.GetMessages(context.Background(), req)
@@ -61,6 +69,12 @@ func InitGrpcClient() error {
 }
 
 func StreamMessages() (chan *proto.Message, error) {
+	if client == nil {
+		msg := "unable to stream messages, content service grpc client has not been initialized"
+		log.Println(msg)
+		return nil, errors.New(msg)
+	}
+
 	stream, err := client.StreamMessages(context.Background(), &proto.StreamMessagesRequest{})
 	if err != nil {
 		log.Printf("failed to create stream from database grpc server to content service grpc client - %s\n", err)
@@ -89,6 +103,12 @@ func StreamMessages() (chan *proto.Message, error) {
 }
 
 func PostMessage(msg *proto.Message) error {
+	if client == nil {
+		msg := "unable to post message, content service grpc client has not been initialized"
+		log.Println(msg)
+		return errors.New(msg)
+	}
+
 	_, err := client.PostMessage(context.Background(), msg)
 	if err != nil {
 		log.Printf("failed to post message to database grpc server - %s\n", err)

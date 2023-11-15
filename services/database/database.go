@@ -3,6 +3,7 @@ package main
 import (
 	proto "database-service/genproto/database"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -13,13 +14,21 @@ import (
 var db *sql.DB
 
 func CloseDb() {
-	db.Close()
+	if db != nil {
+		db.Close()
+	}
 }
 
 func GetMessages(limit int32) (*proto.Messages, error) {
 	sqlStr := "SELECT * FROM messages ORDER BY time"
 	if limit > 0 {
 		sqlStr += fmt.Sprintf(" LIMIT %d", limit)
+	}
+
+	if db == nil {
+		msg := "unable to get all messages, database connection has not been initialized"
+		log.Println(msg)
+		return nil, errors.New(msg)
 	}
 
 	rows, err := db.Query(sqlStr)
@@ -47,6 +56,12 @@ func GetMessages(limit int32) (*proto.Messages, error) {
 }
 
 func PostMessage(msg *proto.Message) error {
+	if db == nil {
+		msg := "unable to post message, database connection has not been initialized"
+		log.Println(msg)
+		return errors.New(msg)
+	}
+
 	_, err := db.Exec(fmt.Sprintf("INSERT INTO messages(message, name, time) VALUES (%s, %s, %d)", msg.Message, msg.Name, msg.Time))
 	if err != nil {
 		log.Printf("error occurred attempting to insert message - message: %s, name: %s, time: %d\n", msg.Message, msg.Name, msg.Time)

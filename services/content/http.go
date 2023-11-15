@@ -12,12 +12,6 @@ import (
 	"github.com/a-h/templ"
 )
 
-type Message struct {
-	message string
-	name    string
-	time    string
-}
-
 func InitHttpServer() error {
 	log.Println("setting up content service http server..")
 	host := os.Getenv("CONTENT_SERVICE_HOST")
@@ -53,6 +47,8 @@ func InitHttpServer() error {
 }
 
 func messages() *templ.ComponentHandler {
+	log.Println("received messages request..")
+
 	res, err := GetMessages(0)
 	if err != nil {
 		log.Printf("error occurred attempting to get all messages - %s\n", err)

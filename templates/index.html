@@ -18,9 +18,7 @@
             <textarea class="message-input"></textarea>
             <button class="send-button">Send</button>
         </div>
-        <div class="chat-history">
-            <span>Chat History</span>
-            <div>messages</div>
+        <div class="chat-history" hx-get="/messages" hx-trigger="load">
         </div>
     </main>
 </body>
