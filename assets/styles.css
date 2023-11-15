@@ -1,0 +1,32 @@
+.message-input {
+    min-width: 45rem;
+    resize: none;
+    width: 90%
+}
+
+.message-input-wrapper {
+    display: flex;
+    justify-content: space-between;
+    height: 5rem;
+    margin-bottom: 1rem;
+    min-width: 51rem;
+    width: 100%;
+}
+
+.page-header {
+    margin: 1rem 0;
+}
+
+.page-wrapper {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.send-button {
+    width: 7%;
+    height: 50%;
+    margin: auto 0;
+    min-width: 4rem;
+}

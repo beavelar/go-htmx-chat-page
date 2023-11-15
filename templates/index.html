@@ -1,21 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width,
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,
         initial-scale=1.0" />
-        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <script src="/assets/htmx.js"></script>
-        <link href="/assets/styles.css" rel="stylesheet" />
-        <title>Go/HTMX Chat page</title>
-    </head>
-    <body>
-        <main>
-            <div>
-                <h1>Go/HTMX Chat Page</h1>
-                <br/>
-                <span>Chat History</span>
-                <div>messages</div>
-            </div>
-        </main>
-    </body>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="/assets/htmx.js"></script>
+    <link href="/assets/styles.css" rel="stylesheet" />
+    <title>Go/HTMX Chat page</title>
+</head>
+
+<body>
+    <main class="page-wrapper">
+        <h1 class="page-header">Go/HTMX Chat Page</h1>
+        <div class="message-input-wrapper">
+            <textarea class="message-input"></textarea>
+            <button class="send-button">Send</button>
+        </div>
+        <div class="chat-history">
+            <span>Chat History</span>
+            <div>messages</div>
+        </div>
+    </main>
+</body>
+
 </html>
