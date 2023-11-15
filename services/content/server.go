@@ -12,6 +12,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error occurred setting up content service grpc client - %s\n", err)
 	}
+	defer CloseConn()
 
 	err = InitHttpServer()
 	if err != nil {
@@ -23,5 +24,4 @@ func main() {
 	<-closeC
 
 	log.Println("shutting down content service")
-	defer GrpcConn.Close()
 }

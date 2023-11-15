@@ -12,7 +12,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to create database connection, exiting - %s\n", err)
 	}
-	defer Db.Close()
+	defer CloseDb()
 
 	err = InitGrpcServer()
 	if err != nil {

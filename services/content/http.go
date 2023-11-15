@@ -10,16 +10,6 @@ import (
 	"time"
 )
 
-func rootReq(w http.ResponseWriter, r *http.Request) {
-	msgs, err := GetMessages(0)
-	if err != nil {
-		io.WriteString(w, "")
-		return
-	}
-
-	io.WriteString(w, msgs.String())
-}
-
 func InitHttpServer() error {
 	log.Println("setting up content service http server..")
 	host := os.Getenv("CONTENT_SERVICE_HOST")
@@ -50,4 +40,14 @@ func InitHttpServer() error {
 	}()
 
 	return nil
+}
+
+func rootReq(w http.ResponseWriter, r *http.Request) {
+	msgs, err := GetMessages(0)
+	if err != nil {
+		io.WriteString(w, "")
+		return
+	}
+
+	io.WriteString(w, msgs.String())
 }

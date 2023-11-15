@@ -17,26 +17,6 @@ type dbGrpcServer struct {
 	proto.UnimplementedDatabaseServiceServer
 }
 
-func (s *dbGrpcServer) GetMessages(ctx context.Context, req *proto.GetMessagesRequest) (*proto.Messages, error) {
-	log.Printf("received GetMessages request - limit: %d\n", req.InitialLimit)
-	return &proto.Messages{Messages: []*proto.Message{}}, nil
-}
-
-func (s *dbGrpcServer) StreamMessages(req *proto.StreamMessagesRequest, stream proto.DatabaseService_StreamMessagesServer) error {
-	log.Println("received StreamMessages request")
-	for {
-		time.Sleep(time.Second)
-		if err := stream.Send(&proto.Message{}); err != nil {
-			return err
-		}
-	}
-}
-
-func (s *dbGrpcServer) PostMessage(ctx context.Context, req *proto.Message) (*proto.PostMessageResponse, error) {
-	log.Printf("received PostMessage request - message: %s\n", req)
-	return &proto.PostMessageResponse{}, nil
-}
-
 func InitGrpcServer() error {
 	log.Println("setting up database grpc server..")
 	host := os.Getenv("DB_GRPC_HOST")
@@ -61,4 +41,34 @@ func InitGrpcServer() error {
 	go func() { grpcServer.Serve(lis) }()
 
 	return nil
+}
+
+func (s *dbGrpcServer) GetMessages(ctx context.Context, req *proto.GetMessagesRequest) (*proto.Messages, error) {
+	log.Printf("received GetMessages request - limit: %d\n", req.InitialLimit)
+	msgs, err := GetMessages(*req.InitialLimit)
+	if err != nil {
+		log.Printf("error occurred retrieving all messages with limit: %d", *req.InitialLimit)
+		return nil, err
+	}
+	return msgs, nil
+}
+
+func (s *dbGrpcServer) StreamMessages(req *proto.StreamMessagesRequest, stream proto.DatabaseService_StreamMessagesServer) error {
+	log.Println("received StreamMessages request")
+	for {
+		time.Sleep(time.Second)
+		if err := stream.Send(&proto.Message{}); err != nil {
+			return err
+		}
+	}
+}
+
+func (s *dbGrpcServer) PostMessage(ctx context.Context, req *proto.Message) (*proto.PostMessageResponse, error) {
+	log.Printf("received PostMessage request - message: %s\n", req)
+	err := PostMessage(req)
+	if err != nil {
+		log.Printf("error occurred posting the following message - message: %s, name: %s, time: %d", req.Message, req.Name, req.Time)
+		return nil, err
+	}
+	return &proto.PostMessageResponse{Success: true}, nil
 }
