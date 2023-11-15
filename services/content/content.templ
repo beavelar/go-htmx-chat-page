@@ -1,0 +1,19 @@
+package main
+
+import "strconv"
+
+import proto "content-service/genproto/database"
+
+templ Messages(msgs *proto.Messages) {
+	<div>
+		<ul>
+			for _, msg := range msgs.Messages {
+				<li>
+					<p>{ msg.Name }</p>
+					<p>{ msg.Message }</p>
+					<p>{ strconv.FormatInt(msg.Time, 10) }</p>
+				</li>
+			}
+		</ul>
+	</div>
+}

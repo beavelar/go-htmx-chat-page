@@ -1,14 +1,22 @@
 package main
 
 import (
+	proto "content-service/genproto/database"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/a-h/templ"
 )
+
+type Message struct {
+	message string
+	name    string
+	time    string
+}
 
 func InitHttpServer() error {
 	log.Println("setting up content service http server..")
@@ -25,6 +33,8 @@ func InitHttpServer() error {
 	log.Printf("starting up http server: host - %s, port - %s\n", host, port)
 
 	mux := http.NewServeMux()
+	mux.Handle("/messages", messages())
+
 	httpServer := &http.Server{
 		Addr:              fmt.Sprintf("%s:%s", host, port),
 		Handler:           mux,
@@ -42,12 +52,12 @@ func InitHttpServer() error {
 	return nil
 }
 
-func rootReq(w http.ResponseWriter, r *http.Request) {
-	msgs, err := GetMessages(0)
+func messages() *templ.ComponentHandler {
+	res, err := GetMessages(0)
 	if err != nil {
-		io.WriteString(w, "")
-		return
+		log.Printf("error occurred attempting to get all messages - %s\n", err)
+		res = &proto.Messages{Messages: make([]*proto.Message, 0)}
 	}
 
-	io.WriteString(w, msgs.String())
+	return templ.Handler(Messages(res))
 }
