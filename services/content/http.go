@@ -32,6 +32,8 @@ func InitHttpServer() error {
 		return errors.New("no CONTENT_SERVICE_PORT environment variable provided, exiting..")
 	}
 
+	log.Printf("starting up http server: host - %s, port - %s\n", host, port)
+
 	mux := http.NewServeMux()
 	httpServer := &http.Server{
 		Addr:              fmt.Sprintf("%s:%s", host, port),
@@ -44,8 +46,7 @@ func InitHttpServer() error {
 
 	go func() {
 		err := httpServer.ListenAndServe()
-		log.Printf("error occurred attempting to spin up content service http server - %s\n", err)
-		os.Exit(1)
+		log.Fatalf("error occurred attempting to spin up content service http server - %s\n", err)
 	}()
 
 	return nil

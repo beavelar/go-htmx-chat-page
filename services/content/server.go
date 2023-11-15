@@ -10,14 +10,12 @@ import (
 func main() {
 	err := InitGrpcClient()
 	if err != nil {
-		log.Printf("error occurred setting up content service grpc client - %s\n", err)
-		panic(err)
+		log.Fatalf("error occurred setting up content service grpc client - %s\n", err)
 	}
 
 	err = InitHttpServer()
 	if err != nil {
-		log.Printf("error occurred setting up content service http server - %s\n", err)
-		panic(err)
+		log.Fatalf("error occurred setting up content service http server - %s\n", err)
 	}
 
 	closeC := make(chan os.Signal, 1)

@@ -3,37 +3,25 @@ package main
 import (
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	dbHost := os.Getenv("DATABASE_HOST")
-	if dbHost == "" {
-		log.Println("no database host provided, exiting..")
-		os.Exit(1)
-	}
-
-	dbName := os.Getenv("DATABASE_NAME")
-	if dbName == "" {
-		log.Println("no database name provided, exiting..")
-		os.Exit(1)
-	}
-
-	dbUser := os.Getenv("DATABASE_USER")
-	if dbUser == "" {
-		log.Println("no database user provided, exiting..")
-		os.Exit(1)
-	}
-
-	dbPass := os.Getenv("DATABASE_PASSWORD")
-	if dbPass == "" {
-		log.Println("no database password provided, exiting..")
-		os.Exit(1)
-	}
-
-	err := InitDb(dbHost, dbName, dbUser, dbPass)
+	err := InitDb()
 	if err != nil {
-		log.Printf("failed to create database session, exiting - %s\n", err)
-		os.Exit(1)
+		log.Fatalf("failed to create database connection, exiting - %s\n", err)
 	}
 	defer Db.Close()
+
+	err = InitGrpcServer()
+	if err != nil {
+		log.Fatalf("failed to start database grpc server, exiting - %s\n", err)
+	}
+
+	closeC := make(chan os.Signal, 1)
+	signal.Notify(closeC, syscall.SIGINT, syscall.SIGTERM)
+	<-closeC
+
+	log.Println("shutting down database service")
 }
