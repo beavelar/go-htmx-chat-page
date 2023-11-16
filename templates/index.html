@@ -14,12 +14,8 @@
 <body>
     <main class="page-wrapper">
         <h1 class="page-header">Go/HTMX Chat Page</h1>
-        <div class="message-input-wrapper">
-            <textarea class="message-input"></textarea>
-            <button class="send-button">Send</button>
-        </div>
-        <div class="chat-history" hx-get="/messages" hx-trigger="load">
-        </div>
+        <div hx-get="message" hx-trigger="load"></div>
+        <div class="chat-history" hx-get="/messages" hx-trigger="load"></div>
     </main>
 </body>
 

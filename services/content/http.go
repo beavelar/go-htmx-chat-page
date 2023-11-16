@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/a-h/templ"
 )
 
 func InitHttpServer() error {
@@ -24,10 +22,11 @@ func InitHttpServer() error {
 		return errors.New("no CONTENT_SERVICE_PORT environment variable provided, exiting..")
 	}
 
-	log.Printf("starting up http server: host - %s, port - %s\n", host, port)
+	log.Printf("starting up http server - host: %s, port: %s\n", host, port)
 
 	mux := http.NewServeMux()
-	mux.Handle("/messages", messages())
+	mux.HandleFunc("/message", message)
+	mux.HandleFunc("/messages", messages)
 
 	httpServer := &http.Server{
 		Addr:              fmt.Sprintf("%s:%s", host, port),
@@ -38,22 +37,39 @@ func InitHttpServer() error {
 		IdleTimeout:       10 * time.Second,
 	}
 
-	go func() {
-		err := httpServer.ListenAndServe()
-		log.Fatalf("error occurred attempting to spin up content service http server - %s\n", err)
-	}()
+	err := httpServer.ListenAndServe()
+	log.Fatalf("error occurred attempting to spin up content service http server: %s\n", err)
 
 	return nil
 }
 
-func messages() *templ.ComponentHandler {
+func message(w http.ResponseWriter, r *http.Request) {
+	log.Println("received message request..")
+	if r.Method == http.MethodPost {
+		r.ParseForm()
+
+		if r.Form.Has("message") {
+			err := PostMessage(&proto.Message{Message: r.Form.Get("message"), Name: "UnkownUser", Time: time.Now().Unix()})
+			if err != nil {
+				log.Printf("failed to post message: %s\n", err)
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		}
+	}
+
+	component := Message()
+	component.Render(r.Context(), w)
+}
+
+func messages(w http.ResponseWriter, r *http.Request) {
 	log.Println("received messages request..")
 
 	res, err := GetMessages(0)
 	if err != nil {
-		log.Printf("error occurred attempting to get all messages - %s\n", err)
+		log.Printf("error occurred attempting to get all messages: %s\n", err)
 		res = &proto.Messages{Messages: make([]*proto.Message, 0)}
 	}
 
-	return templ.Handler(Messages(res))
+	component := Messages(res)
+	component.Render(r.Context(), w)
 }

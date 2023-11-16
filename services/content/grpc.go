@@ -25,11 +25,7 @@ func CloseConn() {
 }
 
 func GetMessages(limit int32) (*proto.Messages, error) {
-	req := &proto.GetMessagesRequest{}
-	if limit > 0 {
-		req.InitialLimit = &limit
-	}
-
+	req := &proto.GetMessagesRequest{InitialLimit: &limit}
 	if client == nil {
 		msg := "unable to get all messages, content service grpc client has not been initialized"
 		log.Println(msg)
@@ -38,7 +34,7 @@ func GetMessages(limit int32) (*proto.Messages, error) {
 
 	res, err := client.GetMessages(context.Background(), req)
 	if err != nil {
-		log.Printf("failed to get messages from database grpc server - %s\n", err)
+		log.Printf("failed to get messages from database grpc server: %s\n", err)
 		return nil, err
 	}
 
@@ -64,6 +60,7 @@ func InitGrpcClient() error {
 		return err
 	}
 
+	log.Printf("starting up grpc client - host: %s, port: %s\n", host, port)
 	client = proto.NewDatabaseServiceClient(conn)
 	return nil
 }
@@ -91,7 +88,7 @@ func StreamMessages() (chan *proto.Message, error) {
 			}
 
 			if err != nil {
-				log.Printf("error occurred receiving messages from database grpc server - %v\n", err)
+				log.Printf("error occurred receiving messages from database grpc server: %s\n", err)
 				return
 			}
 

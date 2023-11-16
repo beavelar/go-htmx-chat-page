@@ -4,6 +4,13 @@ import "strconv"
 
 import proto "content-service/genproto/database"
 
+templ Message() {
+	<form class="message-input-wrapper" hx-post="/message">
+		<textarea class="message-input" id="message" name="message"></textarea>
+		<button class="send-button" type="submit">Send</button>
+	</form>
+}
+
 templ Messages(msgs *proto.Messages) {
 	<ul>
 		for _, msg := range msgs.Messages {

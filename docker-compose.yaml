@@ -3,15 +3,16 @@ services:
     build:
       context: ./services/content
       dockerfile: Dockerfile
+    depends_on:
+      database:
+        condition: service_started
     environment:
       - CONTENT_SERVICE_HOST=content
       - CONTENT_SERVICE_PORT=80
       - DB_SERVICE_HOST=database
       - DB_SERVICE_PORT=80
     networks:
-      - content
-    ports:
-      - 55591:80
+      - content_network
   database:
     build:
       context: ./services/database
@@ -27,8 +28,8 @@ services:
       - DB_GRPC_HOST=database
       - DB_GRPC_PORT=80
     networks:
-      - content
-      - database
+      - content_network
+      - database_network
   database-seed:
     build:
       context: ./services/database-seed
@@ -43,7 +44,7 @@ services:
       - INIT_DATABASE=${INIT_DATABASE}
       - PGPASSWORD=${DATABASE_PASSWORD}
     networks:
-      - database
+      - database_network
   postgres-db:
     image: postgres:latest
     environment:
@@ -51,15 +52,15 @@ services:
       - POSTGRES_USER=${DATABASE_USER}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
     networks:
-      - database
+      - database_network
   nginx:
     build: .
     networks:
-      - content
+      - content_network
     ports: 
       - "55590:80"
 networks:
-  content:
+  content_network:
     driver: bridge
-  database:
+  database_network:
     driver: bridge

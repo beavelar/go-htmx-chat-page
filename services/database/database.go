@@ -33,15 +33,15 @@ func GetMessages(limit int32) (*proto.Messages, error) {
 
 	rows, err := db.Query(sqlStr)
 	if err != nil {
-		log.Printf("error occurred querying for all messages with limit: %d\n", limit)
+		log.Printf("error occurred querying for all messages with limit: %d - %s\n", limit, err)
 		return nil, err
 	}
 	defer rows.Close()
 
-	var msgs []*proto.Message
+	msgs := make([]*proto.Message, 0)
 
 	for rows.Next() {
-		var msg *proto.Message
+		msg := &proto.Message{}
 		if err := rows.Scan(&msg.Message, &msg.Name, &msg.Time); err != nil {
 			log.Printf("error occurred scanning one of the rows from query response - %s\n", err)
 			return &proto.Messages{Messages: msgs}, err
@@ -62,9 +62,9 @@ func PostMessage(msg *proto.Message) error {
 		return errors.New(msg)
 	}
 
-	_, err := db.Exec(fmt.Sprintf("INSERT INTO messages(message, name, time) VALUES (%s, %s, %d)", msg.Message, msg.Name, msg.Time))
+	_, err := db.Exec(fmt.Sprintf("INSERT INTO messages(message, name, time) VALUES ('%s', '%s', %d)", msg.Message, msg.Name, msg.Time))
 	if err != nil {
-		log.Printf("error occurred attempting to insert message - message: %s, name: %s, time: %d\n", msg.Message, msg.Name, msg.Time)
+		log.Printf("error occurred attempting to insert message - message: %s, name: %s, time: %d - %s\n", msg.Message, msg.Name, msg.Time, err)
 		return err
 	}
 	return nil
@@ -92,10 +92,10 @@ func InitDb() error {
 		log.Fatalf("no database password provided, exiting..")
 	}
 
-	log.Printf("connecting to database: host - %s, name - %s, user - %s\n", host, name, user)
+	log.Printf("connecting to database with - name: %s, user: %s\n", name, user)
 
 	var err error
-	connStr := fmt.Sprintf("connect_timeout=10 dbname=%s host=%s user=%s password=%s", name, host, user, pass)
+	connStr := fmt.Sprintf("connect_timeout=10 dbname=%s host=%s user=%s password=%s sslmode=disable", name, host, user, pass)
 	db, err = sql.Open("postgres", connStr)
 	return err
 }

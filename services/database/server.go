@@ -2,9 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 func main() {
@@ -18,10 +15,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to start database grpc server, exiting - %s\n", err)
 	}
-
-	closeC := make(chan os.Signal, 1)
-	signal.Notify(closeC, syscall.SIGINT, syscall.SIGTERM)
-	<-closeC
 
 	log.Println("shutting down database service")
 }
