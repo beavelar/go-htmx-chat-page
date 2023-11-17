@@ -64,7 +64,7 @@ func (s *dbGrpcServer) StreamMessages(req *proto.StreamMessagesRequest, stream p
 }
 
 func (s *dbGrpcServer) PostMessage(ctx context.Context, req *proto.Message) (*proto.PostMessageResponse, error) {
-	log.Printf("received PostMessage request - message: %s\n", req)
+	log.Printf("received PostMessage request with the following message - message: %s, name: %s, time: %d\n", req.Message, req.Name, req.Time)
 	err := PostMessage(req)
 	if err != nil {
 		log.Printf("error occurred posting the following message - message: %s, name: %s, time: %d - %s\n", req.Message, req.Name, req.Time, err)

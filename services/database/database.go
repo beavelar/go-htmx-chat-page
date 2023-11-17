@@ -20,7 +20,7 @@ func CloseDb() {
 }
 
 func GetMessages(limit int32) (*proto.Messages, error) {
-	sqlStr := "SELECT * FROM messages ORDER BY time"
+	sqlStr := "SELECT * FROM messages ORDER BY time DESC"
 	if limit > 0 {
 		sqlStr += fmt.Sprintf(" LIMIT %d", limit)
 	}
@@ -39,15 +39,15 @@ func GetMessages(limit int32) (*proto.Messages, error) {
 	defer rows.Close()
 
 	msgs := make([]*proto.Message, 0)
-
 	for rows.Next() {
 		msg := &proto.Message{}
-		if err := rows.Scan(&msg.Message, &msg.Name, &msg.Time); err != nil {
+		if err := rows.Scan(&msg.Name, &msg.Message, &msg.Time); err != nil {
 			log.Printf("error occurred scanning one of the rows from query response - %s\n", err)
 			return &proto.Messages{Messages: msgs}, err
 		}
 		msgs = append(msgs, msg)
 	}
+
 	if err = rows.Err(); err != nil {
 		log.Printf("error occurred scanning the rows from the query response - %s\n", err)
 		return &proto.Messages{Messages: msgs}, err
