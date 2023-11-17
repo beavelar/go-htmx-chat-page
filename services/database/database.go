@@ -2,20 +2,19 @@ package main
 
 import (
 	proto "database-service/genproto/database"
-	"database/sql"
 	"errors"
 	"fmt"
 	"log"
 	"os"
 
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx"
 )
 
-var db *sql.DB
+var pool *pgx.ConnPool
 
 func CloseDb() {
-	if db != nil {
-		db.Close()
+	if pool != nil {
+		pool.Close()
 	}
 }
 
@@ -25,13 +24,13 @@ func GetMessages(limit int32) (*proto.Messages, error) {
 		sqlStr += fmt.Sprintf(" LIMIT %d", limit)
 	}
 
-	if db == nil {
+	if pool == nil {
 		msg := "unable to get all messages, database connection has not been initialized"
 		log.Println(msg)
 		return nil, errors.New(msg)
 	}
 
-	rows, err := db.Query(sqlStr)
+	rows, err := pool.Query(sqlStr)
 	if err != nil {
 		log.Printf("error occurred querying for all messages with limit: %d - %s\n", limit, err)
 		return nil, err
@@ -56,13 +55,13 @@ func GetMessages(limit int32) (*proto.Messages, error) {
 }
 
 func PostMessage(msg *proto.Message) error {
-	if db == nil {
+	if pool == nil {
 		msg := "unable to post message, database connection has not been initialized"
 		log.Println(msg)
 		return errors.New(msg)
 	}
 
-	_, err := db.Exec(fmt.Sprintf("INSERT INTO messages(message, name, time) VALUES ('%s', '%s', %d)", msg.Message, msg.Name, msg.Time))
+	_, err := pool.Exec(fmt.Sprintf("INSERT INTO messages(message, name, time) VALUES ('%s', '%s', %d)", msg.Message, msg.Name, msg.Time))
 	if err != nil {
 		log.Printf("error occurred attempting to insert message - message: %s, name: %s, time: %d - %s\n", msg.Message, msg.Name, msg.Time, err)
 		return err
@@ -94,8 +93,12 @@ func InitDb() error {
 
 	log.Printf("connecting to database with - name: %s, user: %s\n", name, user)
 
-	var err error
 	connStr := fmt.Sprintf("connect_timeout=10 dbname=%s host=%s user=%s password=%s sslmode=disable", name, host, user, pass)
-	db, err = sql.Open("postgres", connStr)
+	config, err := pgx.ParseConnectionString(connStr)
+	if err != nil {
+		log.Fatalf("error occurred parsing database connection string, exiting..")
+	}
+
+	pool, err = pgx.NewConnPool(pgx.ConnPoolConfig{ConnConfig: config})
 	return err
 }
