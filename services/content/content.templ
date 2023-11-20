@@ -6,22 +6,17 @@ import "strings"
 import proto "content-service/genproto/database"
 
 templ Message() {
-	<form class="message-input-wrapper" hx-post="/message">
-		<textarea class="message-input" id="message" name="message"></textarea>
-		<button class="send-button" type="submit">Send</button>
-	</form>
+	<textarea class="message-input" id="message-input" name="message"></textarea>
 }
 
 templ Messages(msgs *proto.Messages) {
-	<ul>
-		for _, msg := range msgs.Messages {
-			<li>
-				<p>{ msg.Name }</p>
-				for _, line := range strings.Split(msg.Message, "\n") {
-					<p>{ line }</p>
-				}
-				<p>{ strconv.FormatInt(msg.Time, 10) }</p>
-			</li>
-		}
-	</ul>
+	for _, msg := range msgs.Messages {
+		<div>
+			<p>{ msg.Name }</p>
+			for _, line := range strings.Split(msg.Message, "\n") {
+				<p>{ line }</p>
+			}
+			<p>{ strconv.FormatInt(msg.Time, 10) }</p>
+		</div>
+	}
 }

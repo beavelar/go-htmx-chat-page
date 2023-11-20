@@ -7,15 +7,29 @@
         initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <script src="/assets/htmx.js"></script>
+    <script src="/assets/htmx-ws-ext.js"></script>
     <link href="/assets/styles.css" rel="stylesheet" />
     <title>Go/HTMX Chat page</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
 </head>
 
 <body>
     <main class="page-wrapper">
         <h1 class="page-header">Go/HTMX Chat Page</h1>
-        <div hx-get="message" hx-trigger="load"></div>
-        <div class="chat-history" hx-get="/messages" hx-trigger="load"></div>
+        <form class="message-input-wrapper" hx-post="/message" hx-target="#message-input" hx-swap="outerHTML">
+            <textarea class="message-input" id="message-input" name="message"></textarea>
+            <button class="send-button" type="submit">Send</button>
+        </form>
+        <div hx-ext="ws" ws-connect="/ws/chat">
+            <div class="chat-history" id="chat-history" hx-swap-oob="afterbegin">
+                <div id="empty-chat" hx-get="/messages" hx-trigger="load" hx-swap="outerHTML">No messages...</div>
+            </div>
+
+            <!-- Websocket keep alive ping -->
+            <form style="display: none;" ws-send hx-trigger="every 30s">
+                <input name="ping" value="ping" />
+            </form>
+        </div>
     </main>
 </body>
 
