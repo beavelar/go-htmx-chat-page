@@ -22,16 +22,7 @@
             <textarea class="message-input" id="message-input" name="message"></textarea>
             <button class="send-button" type="submit">Send</button>
         </form>
-        <div hx-ext="ws" ws-connect="/ws/chat">
-            <div class="chat-history" id="chat-history" hx-swap-oob="afterbegin">
-                <div id="chat-message" hx-get="/messages" hx-trigger="load" hx-swap="outerHTML"></div>
-            </div>
-
-            <!-- Websocket keep alive ping -->
-            <form style="display: none;" ws-send hx-trigger="every 30s">
-                <input name="ping" value="ping" />
-            </form>
-        </div>
+        <div id="loading" hx-get="/messages" hx-trigger="load"></div>
     </main>
 </body>
 

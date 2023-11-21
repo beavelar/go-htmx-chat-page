@@ -17,9 +17,16 @@ templ MessageInput() {
 }
 
 templ Messages(msgs *proto.Messages) {
-	for _, msg := range msgs.Messages {
-		@Message(msg)
-	}
+	<div hx-ext="ws" ws-connect="/ws/chat">
+		<div class="chat-history" id="chat-history">
+			for _, msg := range msgs.Messages {
+				@Message(msg)
+			}
+		</div>
+		<form style="display: none;" ws-send hx-trigger="every 30s">
+			<input name="ping" value="ping"/>
+		</form>
+	</div>
 }
 
 templ MessageUpdate(msg *proto.Message) {
