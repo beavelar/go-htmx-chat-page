@@ -18,7 +18,7 @@
         <h1 class="page-header">Go/HTMX Chat Page</h1>
     </header>
     <main class="page-wrapper">
-        <div id="loading" hx-get="/messages" hx-trigger="load"></div>
+        <div id="loading" hx-get="/messages" hx-trigger="load" hx-swap="outerHTML"></div>
     </main>
 </body>
 

@@ -129,7 +129,7 @@ func message(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := PostMessage(r.Context(), &proto.Message{Message: r.Form.Get("message"), Name: "UnkownUser", Time: time.Now().Unix()})
+	err := PostMessage(r.Context(), &proto.Message{Message: r.Form.Get("message"), Name: "Unknown User", Time: time.Now().Unix()})
 	if err != nil {
 		log.Printf("failed to post message: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
