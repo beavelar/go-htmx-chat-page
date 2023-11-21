@@ -5,14 +5,12 @@ import (
 )
 
 func main() {
-	err := InitDb()
-	if err != nil {
+	if err := InitDb(); err != nil {
 		log.Fatalf("failed to create database connection, exiting - %s\n", err)
 	}
 	defer CloseDb()
 
-	err = InitGrpcServer()
-	if err != nil {
+	if err := InitGrpcServer(); err != nil {
 		log.Fatalf("failed to start database grpc server, exiting - %s\n", err)
 	}
 

@@ -24,15 +24,12 @@ func CloseConn() {
 	}
 }
 
-func GetMessages(limit int32) (*proto.Messages, error) {
-	req := &proto.GetMessagesRequest{InitialLimit: &limit}
-	if client == nil {
-		msg := "unable to get all messages, content service grpc client has not been initialized"
-		log.Println(msg)
-		return nil, errors.New(msg)
+func GetMessages(ctx context.Context, limit int32) (*proto.Messages, error) {
+	if err := checkClient(); err != nil {
+		return nil, err
 	}
 
-	res, err := client.GetMessages(context.Background(), req)
+	res, err := client.GetMessages(ctx, &proto.GetMessagesRequest{InitialLimit: &limit})
 	if err != nil {
 		log.Printf("failed to get messages from database grpc server: %s\n", err)
 		return nil, err
@@ -53,8 +50,7 @@ func InitGrpcClient() error {
 		return errors.New("no DB_SERVICE_PORT environment variable provided,  exiting..")
 	}
 
-	var err error
-	conn, err = grpc.Dial(fmt.Sprintf("%s:%s", host, port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", host, port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Printf("failed to connect to database service grpc server - %s\n", err)
 		return err
@@ -65,52 +61,64 @@ func InitGrpcClient() error {
 	return nil
 }
 
-func StreamMessages() (chan *proto.Message, error) {
-	if client == nil {
-		msg := "unable to stream messages, content service grpc client has not been initialized"
-		log.Println(msg)
-		return nil, errors.New(msg)
-	}
-
-	stream, err := client.StreamMessages(context.Background(), &proto.StreamMessagesRequest{})
-	if err != nil {
-		log.Printf("failed to create stream from database grpc server to content service grpc client - %s\n", err)
+func StreamMessages(ctx context.Context) (chan *proto.Message, error) {
+	if err := checkClient(); err != nil {
 		return nil, err
 	}
 
-	c := make(chan *proto.Message)
-
-	go func() {
-		for {
-			msg, err := stream.Recv()
-			if err == io.EOF {
-				break
-			}
-
-			if err != nil {
-				log.Printf("error occurred receiving messages from database grpc server: %s\n", err)
-				return
-			}
-
-			c <- msg
-		}
-	}()
-
-	return c, nil
-}
-
-func PostMessage(msg *proto.Message) error {
-	if client == nil {
-		msg := "unable to post message, content service grpc client has not been initialized"
-		log.Println(msg)
-		return errors.New(msg)
+	stream, err := client.StreamMessages(ctx, &proto.StreamMessagesRequest{})
+	if err != nil {
+		log.Printf("failed to create stream from database grpc server to content service grpc client: %s\n", err)
+		return nil, err
 	}
 
-	_, err := client.PostMessage(context.Background(), msg)
-	if err != nil {
-		log.Printf("failed to post message to database grpc server - %s\n", err)
+	ch := make(chan *proto.Message)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				log.Println("received context done, closing message stream channel")
+				close(ch)
+				return
+			default:
+				msg, err := stream.Recv()
+				if err == io.EOF {
+					log.Println("received end of file on database grpc stream, closing channel")
+					close(ch)
+					return
+				}
+
+				if err != nil {
+					log.Printf("error occurred receiving messages from database grpc server: %s\n", err)
+					close(ch)
+					return
+				}
+
+				log.Printf("received message from database grpc server, sending out to clients: %s", msg)
+				ch <- msg
+			}
+		}
+	}()
+	return ch, nil
+}
+
+func PostMessage(ctx context.Context, msg *proto.Message) error {
+	if err := checkClient(); err != nil {
 		return err
 	}
 
+	if _, err := client.PostMessage(ctx, msg); err != nil {
+		log.Printf("failed to post message to database grpc server: %s\n", err)
+		return err
+	}
+
+	return nil
+}
+
+func checkClient() error {
+	if client == nil {
+		log.Println("grpc client not initlialized, operation will not be conducted")
+		return errors.New("grpc client not initlialized, operation will not be conducted")
+	}
 	return nil
 }

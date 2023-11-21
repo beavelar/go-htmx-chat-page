@@ -1,7 +1,6 @@
 package main
 
 import "strconv"
-import "strings"
 
 import proto "content-service/genproto/database"
 
@@ -11,12 +10,10 @@ templ Message() {
 
 templ Messages(msgs *proto.Messages) {
 	for _, msg := range msgs.Messages {
-		<div>
-			<p>{ msg.Name }</p>
-			for _, line := range strings.Split(msg.Message, "\n") {
-				<p>{ line }</p>
-			}
-			<p>{ strconv.FormatInt(msg.Time, 10) }</p>
+		<div class="chat-message" id="chat-message">
+			<p class="chat-item">{ msg.Name }</p>
+			<p class="chat-item">{ msg.Message }</p>
+			<p class="chat-item">{ strconv.FormatInt(msg.Time, 10) }</p>
 		</div>
 	}
 }

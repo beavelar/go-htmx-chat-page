@@ -5,14 +5,12 @@ import (
 )
 
 func main() {
-	err := InitGrpcClient()
-	if err != nil {
+	if err := InitGrpcClient(); err != nil {
 		log.Fatalf("error occurred setting up content service grpc client: %s\n", err)
 	}
 	defer CloseConn()
 
-	err = InitHttpServer()
-	if err != nil {
+	if err := InitHttpServer(); err != nil {
 		log.Fatalf("error occurred setting up content service http server: %s\n", err)
 	}
 

@@ -19,15 +19,13 @@ func CloseDb() {
 }
 
 func GetMessages(limit int32) (*proto.Messages, error) {
+	if err := checkPool(); err != nil {
+		return nil, err
+	}
+
 	sqlStr := "SELECT * FROM messages ORDER BY time DESC"
 	if limit > 0 {
 		sqlStr += fmt.Sprintf(" LIMIT %d", limit)
-	}
-
-	if pool == nil {
-		msg := "unable to get all messages, database connection has not been initialized"
-		log.Println(msg)
-		return nil, errors.New(msg)
 	}
 
 	rows, err := pool.Query(sqlStr)
@@ -55,17 +53,15 @@ func GetMessages(limit int32) (*proto.Messages, error) {
 }
 
 func PostMessage(msg *proto.Message) error {
-	if pool == nil {
-		msg := "unable to post message, database connection has not been initialized"
-		log.Println(msg)
-		return errors.New(msg)
+	if err := checkPool(); err != nil {
+		return err
 	}
 
-	_, err := pool.Exec(fmt.Sprintf("INSERT INTO messages(message, name, time) VALUES ('%s', '%s', %d)", msg.Message, msg.Name, msg.Time))
-	if err != nil {
+	if _, err := pool.Exec(fmt.Sprintf("INSERT INTO messages(message, name, time) VALUES ('%s', '%s', %d)", msg.Message, msg.Name, msg.Time)); err != nil {
 		log.Printf("error occurred attempting to insert message - message: %s, name: %s, time: %d - %s\n", msg.Message, msg.Name, msg.Time, err)
 		return err
 	}
+
 	return nil
 }
 
@@ -101,4 +97,12 @@ func InitDb() error {
 
 	pool, err = pgx.NewConnPool(pgx.ConnPoolConfig{ConnConfig: config})
 	return err
+}
+
+func checkPool() error {
+	if pool == nil {
+		log.Println("database connection has not been initialized, database operation will not be conducted")
+		return errors.New("database connection has not been initialized, database operation will not be conducted")
+	}
+	return nil
 }
