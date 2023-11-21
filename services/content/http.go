@@ -91,10 +91,16 @@ func chat(w http.ResponseWriter, r *http.Request) {
 			}
 
 			log.Printf("received message from grpc channel: %s\n", msg)
-			err := conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("<div id=\"chat-history\" hx-swap-oob=\"afterbegin\"><div class=\"chat-message\" id=\"chat-message\">%s</div></div>", msg)))
+			component := MessageUpdate(msg)
+			wr, err := conn.NextWriter(websocket.TextMessage)
 			if err != nil {
-				log.Printf("failed to send message through the websocket, closing websocket connection: %s\n", err)
-				return
+				log.Printf("failed to get a websocket writer, message update won't be sent: %s\n", err)
+				continue
+			}
+
+			component.Render(r.Context(), wr)
+			if err = wr.Close(); err != nil {
+				log.Printf("failed to close message writer, message may be delayed: %s\n", err)
 			}
 		case <-r.Context().Done():
 			log.Println("context done received, closing websocket connection")
@@ -129,7 +135,7 @@ func message(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	component := Message()
+	component := MessageInput()
 	component.Render(r.Context(), w)
 }
 

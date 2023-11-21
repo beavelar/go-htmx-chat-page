@@ -4,16 +4,26 @@ import "strconv"
 
 import proto "content-service/genproto/database"
 
-templ Message() {
+templ Message (msg *proto.Message) {
+	<div class="chat-message" id="chat-message">
+		<p class="chat-item">{ msg.Name }</p>
+		<p class="chat-item">{ msg.Message }</p>
+		<p class="chat-item">{ strconv.FormatInt(msg.Time, 10) }</p>
+	</div>
+}
+
+templ MessageInput() {
 	<textarea class="message-input" id="message-input" name="message"></textarea>
 }
 
 templ Messages(msgs *proto.Messages) {
 	for _, msg := range msgs.Messages {
-		<div class="chat-message" id="chat-message">
-			<p class="chat-item">{ msg.Name }</p>
-			<p class="chat-item">{ msg.Message }</p>
-			<p class="chat-item">{ strconv.FormatInt(msg.Time, 10) }</p>
-		</div>
+		@Message(msg)
 	}
+}
+
+templ MessageUpdate(msg *proto.Message) {
+	<div id="chat-history" hx-swap-oob="afterbegin">
+		@Message(msg)
+	</div>
 }
