@@ -1,6 +1,6 @@
 package main
 
-import "strconv"
+import "time"
 
 import proto "content-service/genproto/database"
 
@@ -8,7 +8,7 @@ templ Message (msg *proto.Message) {
 	<div class="chat-message" id="chat-message">
 		<p class="chat-item chat-user">{ msg.Name }</p>
 		<p class="chat-item chat-content">{ msg.Message }</p>
-		<p class="chat-item chat-date">{ strconv.FormatInt(msg.Time, 10) }</p>
+		<p class="chat-item chat-date">{ time.Unix(msg.Time, 0).Format("2006-01-02 15:04:05") }</p>
 	</div>
 }
 
