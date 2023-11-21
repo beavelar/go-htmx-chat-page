@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -129,7 +130,15 @@ func message(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := PostMessage(r.Context(), &proto.Message{Message: r.Form.Get("message"), Name: "Unknown User", Time: time.Now().Unix()})
+	msg := r.Form.Get("message")
+	if strings.Trim(msg, " ") == "" {
+		log.Println("empty string provided, message will be ignored")
+		component := MessageInput()
+		component.Render(r.Context(), w)
+		return
+	}
+
+	err := PostMessage(r.Context(), &proto.Message{Message: msg, Name: "Unknown User", Time: time.Now().Unix()})
 	if err != nil {
 		log.Printf("failed to post message: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
