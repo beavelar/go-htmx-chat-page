@@ -18,10 +18,6 @@
         <h1 class="page-header">Go/HTMX Chat Page</h1>
     </header>
     <main class="page-wrapper">
-        <form class="message-input-wrapper" hx-post="/message" hx-target="#message-input" hx-swap="outerHTML">
-            <textarea class="message-input" id="message-input" name="message"></textarea>
-            <button class="send-button" type="submit">Send</button>
-        </form>
         <div id="loading" hx-get="/messages" hx-trigger="load"></div>
     </main>
 </body>

@@ -11,6 +11,7 @@
 
 .message-input {
     min-width: 45rem;
+    padding: .5rem .25rem;
     resize: none;
     width: 90%
 }
@@ -18,7 +19,6 @@
 .message-input-wrapper {
     display: flex;
     justify-content: space-between;
-    height: 5rem;
     margin-bottom: 1rem;
     min-width: 51rem;
     width: 100%;
@@ -36,8 +36,5 @@
 }
 
 .send-button {
-    width: 7%;
-    height: 50%;
-    margin: auto 0;
     min-width: 4rem;
 }

@@ -13,10 +13,14 @@ templ Message (msg *proto.Message) {
 }
 
 templ MessageInput() {
-	<textarea class="message-input" id="message-input" name="message"></textarea>
+	<input class="message-input" id="message-input" name="message"/>
+	<button class="send-button" type="submit">Send</button>
 }
 
 templ Messages(msgs *proto.Messages) {
+	<form class="message-input-wrapper" hx-post="/message" hx-swap="innerHTML">
+		@MessageInput()
+	</form>
 	<div hx-ext="ws" ws-connect="/ws/chat">
 		<div class="chat-history" id="chat-history">
 			for _, msg := range msgs.Messages {
