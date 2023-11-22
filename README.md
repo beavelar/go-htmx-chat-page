@@ -6,6 +6,3 @@ protoc --proto_path=proto --go_out=services/database/genproto database.proto --g
 
 ## Compiling templ files
 templ generate
-
-## Run tests, generate report and view report
-go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
