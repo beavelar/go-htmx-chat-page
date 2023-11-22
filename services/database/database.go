@@ -6,11 +6,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/jackc/pgx"
 )
 
-var pool *pgx.ConnPool
+var (
+	pool  *pgx.ConnPool
+	retry = int8(0)
+)
 
 func CloseDb() {
 	if pool != nil {
@@ -95,7 +99,17 @@ func InitDb() error {
 		log.Fatalf("error occurred parsing database connection string, exiting..")
 	}
 
-	pool, err = pgx.NewConnPool(pgx.ConnPoolConfig{ConnConfig: config})
+	for retry < 5 {
+		log.Printf("database connection attempt: %d\n", retry+1)
+		pool, err = pgx.NewConnPool(pgx.ConnPoolConfig{ConnConfig: config})
+		if err == nil {
+			log.Println("database connection established..")
+			break
+		}
+		retry++
+		time.Sleep(5 * time.Second)
+	}
+
 	return err
 }
 
