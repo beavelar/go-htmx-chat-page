@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "initilize database value: $INIT_DATABASE"
 
-if [ $INIT_DATABASE ]
+if [ $INIT_DATABASE = "true" ]
 then
     echo "sleeping for 5 seconds before seeding database"
     sleep 5
